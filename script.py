@@ -1,39 +1,69 @@
 import time
 import urllib.request
 from contextlib import closing
+from flask import Flask, request, send_from_directory, send_file, Response
+import codecs
+import queue
 
-outputFilePath = input("Output file path: ")
-pat = input("String to match: ")
+app = Flask(__name__)
 
-output = open(outputFilePath, "a")
+opTypes = {
+    "ReturnFile": "1",
+    "Interactive": "2"
+}
 
-st = time.time()
-with closing(urllib.request.urlopen('ftp://test:test@192.168.1.6/Thunderbird.log')) as r:
-    with open('Thunderbird.log', 'r') as inF:
-        for i, line in enumerate(inF):
-            if pat in line:
-                output.write(line)
-output.close()
-et = time.time()
+class MessageAnnouncer:
+    def __init__(self):
+        self.listeners = []
 
-print("Elapsed time: ", et - st)
+    def listen(self):
+        q = queue.Queue(maxsize=5)
+        self.listeners.append(q)
+        return q
 
-# urllib.request.urlretrieve('ftp://test:test@192.168.1.6/HDFS.log', 'HDFS.log')
-# blk_-774246298521956028
+    def announce(self, msg):
+        for i in reversed(range(len(self.listeners))):
+            try:
+                self.listeners[i].put_nowait(msg)
+            except queue.Full:
+                del self.listeners[i]
 
+def writeToOutput(pat, loc, username, password, fileName):
+    open('output.txt', 'w').close()
+    output = open('output.txt', 'a')
+    with closing(urllib.request.urlopen(f'ftp://{username}:{password}@{loc}/{fileName}')) as r:
+        for i, line in enumerate(r):
+            lineString = codecs.decode(line, errors='ignore')
+            if pat in lineString:
+                output.write(lineString)
+    output.close()
 
-# inputFilePath = input("Input file path: ")
-# outputFilePath = input("Output file path: ")
-# pat = input("String to match: ")
+def fetchFile(userInfo):
+    pat = userInfo['pattern']
+    loc = userInfo['ftpLocation']
+    username = userInfo['ftpUsername']
+    password = userInfo['ftpPassword']
+    fileName = userInfo['ftpFileName']
+    writeToOutput(pat, loc, username, password, fileName)
 
-# st = time.time()
-# output = open(outputFilePath, "a")
-# with open(inputFilePath, "r") as inF:
-#     for line in inF:
-#         if pat in line:
-#             output.write(line)
-# output.close()
-
-# et = time.time()
-
-# print("Elapsed time: ", et - st)
+@app.route("/api/initialize", methods=['GET'])
+def initializeFileFetch():
+    def generate(userInfo):
+        yield "Starting...\n"
+        pat = userInfo['pattern']
+        loc = userInfo['ftpLocation']
+        username = userInfo['ftpUsername']
+        password = userInfo['ftpPassword']
+        fileName = userInfo['ftpFileName']
+        with closing(urllib.request.urlopen(f'ftp://{username}:{password}@{loc}/{fileName}')) as r:
+            for i, line in enumerate(r):
+                lineString = codecs.decode(line, errors='ignore')
+                if pat in lineString:
+                    yield lineString
+    userInfo = request.get_json(force=True)
+    opType = userInfo['opType']
+    if opType == opTypes['ReturnFile']:
+        fetchFile(userInfo)
+        return send_file('/ionathon/repo/output.txt')
+    elif opType == opTypes['Interactive']:
+        return generate(userInfo)
