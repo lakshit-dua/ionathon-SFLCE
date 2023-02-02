@@ -1,16 +1,20 @@
 import time
 import urllib.request
 from contextlib import closing
-from flask import Flask, request, send_from_directory, send_file, Response
+from flask import Flask, request, send_from_directory, send_file, Response, make_response
+from flask_cors import CORS, cross_origin
 import codecs
 import queue
 
 app = Flask(__name__)
+app.debug = True
+CORS(app)
 
 opTypes = {
-    "ReturnFile": "1",
-    "Interactive": "2"
+    "ReturnFile": 1,
+    "Interactive": 2
 }
+
 
 class MessageAnnouncer:
     def __init__(self):
@@ -28,6 +32,7 @@ class MessageAnnouncer:
             except queue.Full:
                 del self.listeners[i]
 
+
 def writeToOutput(pat, loc, username, password, fileName):
     open('output.txt', 'w').close()
     output = open('output.txt', 'a')
@@ -38,6 +43,7 @@ def writeToOutput(pat, loc, username, password, fileName):
                 output.write(lineString)
     output.close()
 
+
 def fetchFile(userInfo):
     pat = userInfo['pattern']
     loc = userInfo['ftpLocation']
@@ -46,24 +52,37 @@ def fetchFile(userInfo):
     fileName = userInfo['ftpFileName']
     writeToOutput(pat, loc, username, password, fileName)
 
-@app.route("/api/initialize", methods=['GET'])
+
+def returner(userInfo):
+    fetchFile(userInfo)
+    return send_file('/ionathon/repo/output.txt', as_attachment=True)
+
+
+@app.route("/api/initialize", methods=['POST'])
 def initializeFileFetch():
-    def generate(userInfo):
-        yield "Starting...\n"
-        pat = userInfo['pattern']
-        loc = userInfo['ftpLocation']
-        username = userInfo['ftpUsername']
-        password = userInfo['ftpPassword']
-        fileName = userInfo['ftpFileName']
-        with closing(urllib.request.urlopen(f'ftp://{username}:{password}@{loc}/{fileName}')) as r:
-            for i, line in enumerate(r):
-                lineString = codecs.decode(line, errors='ignore')
-                if pat in lineString:
-                    yield lineString
     userInfo = request.get_json(force=True)
     opType = userInfo['opType']
-    if opType == opTypes['ReturnFile']:
-        fetchFile(userInfo)
-        return send_file('/ionathon/repo/output.txt')
-    elif opType == opTypes['Interactive']:
-        return generate(userInfo)
+    print(opType)
+    response = "response"
+    if (opType == opTypes['ReturnFile']):
+        return returner(userInfo)
+    else:
+        response = make_response(generate(userInfo))
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Credentials"] = True
+    # return returner(userInfo), { "Access-Control-Allow-Origin": "*" } if opType == opTypes['ReturnFile'] else generate(userInfo), { "Access-Control-Allow-Origin": "*" }
+    return response
+
+
+def generate(userInfo):
+    yield "Starting...\n"
+    pat = userInfo['pattern']
+    loc = userInfo['ftpLocation']
+    username = userInfo['ftpUsername']
+    password = userInfo['ftpPassword']
+    fileName = userInfo['ftpFileName']
+    with closing(urllib.request.urlopen(f'ftp://{username}:{password}@{loc}/{fileName}')) as r:
+        for i, line in enumerate(r):
+            lineString = codecs.decode(line, errors='ignore')
+            if pat in lineString:
+                yield lineString

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ION SFLCE</title>
+</head>
+<body>
+    <form id="logsForm">
+        <input name="ftpLocation" value="192.167.1.7" placeholder="FTP Location" />
+        <input name="ftpUsername" value="test" placeholder="FTP Username" />
+        <input name="ftpPassword" value="test" placeholder="FTP Password" />
+        <input name="ftpFileName" value="input.txt" placeholder="FTP File name" />
+        <input name="pattern" value="lakshit" placeholder="Pattern" />
+        <label>Interactive?</label>
+        <input name="interactive" type="checkbox" />
+    </form>
+    <button onclick="handleForm()">Click Me</button>
+    <div class="log"></div>
+</body>
+<script>
+    const form = document.getElementById("logsForm");
+    function Utf8ArrayToStr(array) {
+        var out, i, len, c;
+        var char2, char3;
+
+        out = "";
+        len = array.length;
+        i = 0;
+        while(i < len) {
+        c = array[i++];
+        switch(c >> 4)
+        { 
+        case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+            // 0xxxxxxx
+            out += String.fromCharCode(c);
+            break;
+        case 12: case 13:
+            // 110x xxxx   10xx xxxx
+            char2 = array[i++];
+            out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F));
+            break;
+        case 14:
+            // 1110 xxxx  10xx xxxx  10xx xxxx
+            char2 = array[i++];
+            char3 = array[i++];
+            out += String.fromCharCode(((c & 0x0F) << 12) |
+                        ((char2 & 0x3F) << 6) |
+                        ((char3 & 0x3F) << 0));
+            break;
+        }
+        }
+
+        return out;
+    }
+    function handleForm(event) {
+        const formData = new FormData(form);
+        let req = {}
+        for (let pair of formData.entries()) {
+            if (pair[0] === "interactive") {
+                req["opType"] = pair[1] ? 2 : 1;
+            } else {
+                req[pair[0]] = pair[1];
+            }
+        }
+        if (typeof req["opType"] === "undefined") {
+            req["opType"] = 1;
+        }
+        const data = JSON.stringify({
+            "pattern": req["pattern"],
+            "ftpLocation": req["ftpLocation"],
+            "ftpUsername": req["ftpUsername"],
+            "ftpPassword": req["ftpPassword"],
+            "ftpFileName": req["ftpFileName"],
+            "opType": req["opType"]
+        });
+        const options = {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: data
+        };
+
+        fetch('http://127.0.0.1:5000/api/initialize', options).then(response =>
+            response.json()
+        ).then((res) => {
+            console.log(res)
+        });
+    }
+    form.addEventListener("submit", handleForm);
+</script>
+</html>
