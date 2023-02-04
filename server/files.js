@@ -11,7 +11,7 @@ class Connection {
     this.socket = socket;
     this.io = io;
 
-    socket.on('getFile', (index, length ) => this.sendFile(index, length));
+    socket.on('getFile', (fileLocation, index, length) => this.sendFile(fileLocation, index, length));
     socket.on('message', (value) => this.handleMessage(value));
     socket.on('disconnect', () => this.disconnect());
     socket.on('connect_error', (err) => {
@@ -27,9 +27,9 @@ class Connection {
     messages.forEach((message) => this.sendMessage(message));
   }
 
-  sendFile(index, length) {
+  sendFile(fileLocation, index, length) {
     const self = this;
-    const input = fs.createReadStream("public/index.html");
+    const input = fs.createReadStream(fileLocation);
     const rl = readline.createInterface({ input })
     let cursor = 1;
     const content = [];
