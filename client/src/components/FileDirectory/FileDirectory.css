@@ -1,0 +1,14 @@
+.file-directory {
+    height: 100%;
+    background-color: white;
+    border-right: 1px solid skyblue;
+    position: relative;
+}
+
+.expand-button {
+    background-color: skyblue;
+    position: absolute;
+    border: none;
+    right: 0rem;
+    top: 0rem;;
+}

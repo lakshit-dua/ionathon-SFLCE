@@ -5,7 +5,7 @@ function Messages(props) {
   const [fileContent, setFileContent] = useState([]);
 
   const getFile = () => {
-    props.socket.emit("getFile", 1,4);
+    props.socket.emit("getFile", "public/index.html", 1,4);
   }
 
   useEffect(() => {

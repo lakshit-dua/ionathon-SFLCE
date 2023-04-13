@@ -29,22 +29,26 @@ class Connection {
 
   sendFile(fileLocation, index, length) {
     const self = this;
-    const input = fs.createReadStream(fileLocation);
-    const rl = readline.createInterface({ input })
-    let cursor = 1;
-    const content = [];
-      rl.on('line', function(line) {
-        if (cursor > index && cursor <= index+length) {
-            content.push(line);
-            console.log(line);
-        }
-        cursor++;
-        if (cursor === index+length) {
-            rl.close();
-            input.close();
-            self.sendMessage({content});
-        }
-      });
+    try {
+      const input = fs.createReadStream(fileLocation);
+      const rl = readline.createInterface({ input })
+      let cursor = 1;
+      const content = [];
+        rl.on('line', function(line) {
+          if (cursor > index && cursor <= index+length) {
+              content.push(line);
+              console.log(line);
+          }
+          cursor++;
+          if (cursor === index+length) {
+              rl.close();
+              input.close();
+              self.sendMessage({content});
+          }
+        });
+    } catch(err) {
+      self.sendMessage({err});
+    }
   }
 
   handleMessage(value) {

@@ -1,9 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import io from 'socket.io-client';
-import FilePreview from "./components/FilePreview/FilePreview";
+import AppContainer from './components/AppContainer/AppContainer';
+import LoginDialog from './components/LoginDialog/LoginDialog';
 
 function App() {
   const [socket, setSocket] = useState(null);
+  const [user, setUser] = useState(null);
+
+  const handleUserLogin = (userData) => {
+    setUser(userData);
+  }
   
   useEffect(() => {
     const newSocket = io(`http://${window.location.hostname}:3030`);
@@ -13,14 +19,12 @@ function App() {
 
   return (
     <div className="App">
-      { socket ? (
-        <div className="container">
-          <FilePreview socket={socket} />
-        </div>
-        
-      ) : (
-        <div>Not Connected</div>
-      )}
+      {
+        user ? (
+          <AppContainer user={user} socket={socket}></AppContainer>
+        ) : 
+        <LoginDialog loginHandler={handleUserLogin}></LoginDialog>
+      }
     </div>
   );
 }
