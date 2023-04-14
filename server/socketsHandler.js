@@ -68,13 +68,13 @@ class Connection {
     // });
   }
 
-  sendMessage(message) {
-    this.io.sockets.emit("message", message);
+  sendMessage(message, args) {
+    this.io.sockets.emit(message, args);
   }
 
-  getMessages() {
-    messages.forEach((message) => this.sendMessage(message));
-  }
+  // getMessages() {
+  //   messages.forEach((message) => this.sendMessage(message));
+  // }
 
   // sendFile(fileLocation, index, length) {
   //   const self = this;

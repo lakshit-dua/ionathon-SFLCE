@@ -25,7 +25,36 @@ const data = {
   ],
 };
 
-export default function SidebarTree({socket}) {
+export default function SidebarTree(props) {
+  const [data, setData] = React.useState([]);
+
+  const getFile = () => {
+    props.socket.emit("getPublicDir", "");
+    props.socket.emit("getPublicDir", "client-folder");
+  }
+
+  React.useEffect(() => {
+    props.socket.emit("getPublicDir", "");
+    const messageListener = (message) => {
+
+       const data = {
+        id: 'root',
+        name: 'Parent',
+        children: []};
+        message.directory.forEach(element => {
+          data.children.push({name: element, id: element, children:[]});
+        });
+        setData(() => {
+          console.log(data);
+          return data;
+      });
+    };  
+    props.socket.on('getPublicDirResp', messageListener);
+
+    return () => {
+      props.socket.off('getPublicDirResp', messageListener);
+    };
+  }, [props.socket]);
   const renderTree = (nodes) => (
     <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
       {Array.isArray(nodes.children)

@@ -26,11 +26,11 @@ class DirectorySearchHandler {
                         directory.push(file)
                     });
                 }
-                self.connector.sendMessage({directory});
+                self.connector.sendMessage("getPublicDirResp",{directory});
               });
         } catch(err) {
             console.log(err)
-            self.connector.sendMessage({err});
+            self.connector.sendMessage("getPublicDirResp",{err});
         }
     }
 
@@ -42,10 +42,10 @@ class DirectorySearchHandler {
             entries = entries.concat(entry);
         }).then(() =>{
             console.log(entries);
-            this.connector.sendMessage({entries});
+            this.connector.sendMessage("getArchiveListResp", {entries});
         }).catch(err => {
             console.log(err);
-            this.connector.sendMessage({err});
+            this.connector.sendMessage("getArchiveListResp",{err});
         });
     }
 }

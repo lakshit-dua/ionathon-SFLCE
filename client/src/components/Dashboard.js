@@ -72,13 +72,17 @@ const content = [
   "dlkfjgldkjfg",
 ];
 
-const Dashboard = ({ socket }) => {
+
+
+const Dashboard = (props) => {
   const { scrollX, scrollY } = useWindowScrollPositions();
   const [initialIndex, setInitialIndex] = useState(0);
   const [finalIndex, setFinalIndex] = useState(50);
   const [addition, setAddition] = useState(0);
   const [value] = useDebounce(addition, 1000);
   const [search, setSearch] = useState("");
+
+  const [fileContent, setFilecontent] = useState([]);
 
   useEffect(() => {
     if (scrollY) setAddition((addition) => Math.floor(scrollY / 25));
@@ -87,7 +91,16 @@ const Dashboard = ({ socket }) => {
   useEffect(() => {
     setInitialIndex((initialIndex) => 0 + addition);
     setFinalIndex((finalIndex) => 50 + addition);
-  }, [addition]);
+    props.socket.emit("getFile", "client-folder/check1/logs.txt", initialIndex, finalIndex);
+    const messageListener = (message) => {
+      setFilecontent(message.content)
+    };  
+    props.socket.on('getFileResp', messageListener);
+
+    return () => {
+      props.socket.off('getFileResp', messageListener);
+    };
+  }, [props.socket, addition]);
 
   console.log("Scroll position is", scrollX, scrollY);
   console.log("InitialIndex", addition, initialIndex, finalIndex);
@@ -141,13 +154,13 @@ const Dashboard = ({ socket }) => {
       >
         <Toolbar />
         <Box sx={{ overflow: "auto" }}>
-          <SidebarTree socket={socket} />
+          <SidebarTree socket={props.socket} />
         </Box>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         <div>
-          {content.map((c) => (
+          {fileContent.map((c) => (
             <div>{c}</div>
           ))}
           {/* <Accordion>

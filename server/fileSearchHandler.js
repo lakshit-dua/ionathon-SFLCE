@@ -12,12 +12,13 @@ class FileSearchHandler {
     }
 
     init() {
-        this.socket.on('getFile', (location, startIndex, count) => { this.handleFileQuery(location, startIndex, count) });
+        this.socket.on('getFile', (location, startIndex, endIndex) => { this.handleFileQuery(location, startIndex, endIndex) });
         this.socket.on("search", (path, fileName, searchTerm) => { this.handleFileSearch(path, fileName, searchTerm) });
         this.socket.on("readFileBlock", (path, fileName, blockIndex, searchTerm, blockCount) => { this.handleFileBlockRead(path, fileIndex, blockIndex, searchTerm, blockCount); });
     }
 
-    handleFileQuery(location, startIndex, count) {
+    handleFileQuery(location, startIndex, endIndex) {
+        const count = endIndex - startIndex;
         const self = this;
         try {
           const input = fs.createReadStream(baseDir+"/"+location);
@@ -33,11 +34,16 @@ class FileSearchHandler {
               if (cursor === startIndex+count) {
                   rl.close();
                   input.close();
-                  self.connector.sendMessage({content});
+                  self.connector.sendMessage("getFileResp", {content});
               }
             });
+            input.on('end', () => {
+                self.connector.sendMessage("getFileResp", {content});
+                rl.close();
+                input.close();
+            })
         } catch(err) {
-            self.connector.sendMessage({err});
+            self.connector.sendMessage("getFileResp",{err});
         }
     }
 
@@ -88,7 +94,7 @@ class FileSearchHandler {
             const jsonRead = fs.readFileSync(searchResultsDir + "/" + searchTermCleanEntryName + ".json", {
                 encoding: "UTF8"
             });
-            self.connector.sendMessage({jsonRead});
+            self.connector.sendMessage("searchResp", {jsonRead});
         });
     }
 
