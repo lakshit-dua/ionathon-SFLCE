@@ -1,6 +1,7 @@
 const fs = require('fs');
 const baseDir = "./public/logs";
 const readline = require("readline");
+let searchResultsDir = "./searchResults";
     
 class FileSearchHandler {
     constructor(socket, connector) {
@@ -11,8 +12,9 @@ class FileSearchHandler {
     }
 
     init() {
-        this.socket.on('getFile', (location, startIndex, count) => handleFileQuery(location, startIndex, count));
+        this.socket.on('getFile', (location, startIndex, count) => { this.handleFileQuery(location, startIndex, count) });
         this.socket.on("search", (path, fileName, searchTerm) => { this.handleFileSearch(path, fileName, searchTerm) });
+        this.socket.on("readFileBlock", (path, fileName, blockIndex, searchTerm, blockCount) => { this.handleFileBlockRead(path, fileIndex, blockIndex, searchTerm, blockCount); });
     }
 
     handleFileQuery(location, startIndex, count) {
@@ -40,7 +42,7 @@ class FileSearchHandler {
     }
 
     handleFileSearch(path, fileName, searchTerm) {
-        let searchResultsDir = "./searchResults";
+        const self = this;
         let searchTermCleanEntryName = this.sanitizeSearchTermEntry(searchTerm);
         fs.unlinkSync(`${searchResultsDir}/${searchTermCleanEntryName}.json`);
         const jsonWriteStream = fs.createWriteStream(`${searchResultsDir}/${searchTermCleanEntryName}.json`, { 
@@ -83,7 +85,30 @@ class FileSearchHandler {
             rl.close();
             fileSearchStream.close();
             jsonWriteStream.close();
+            const jsonRead = fs.readFileSync(searchResultsDir + "/" + searchTermCleanEntryName + ".json", {
+                encoding: "UTF8"
+            });
+            self.connector.sendMessage({jsonRead});
         });
+    }
+
+    handleFileBlockRead(path, fileIndex, blockIndex, searchTerm, blockCount) {
+        let searchTermCleanEntryName = this.sanitizeSearchTermEntry(searchTerm);
+        const jsonRead = fs.readFileSync(searchResultsDir + "/" + searchTermCleanEntryName + ".json", {
+            encoding: "UTF8"
+        });
+
+        // const searchObject = JSON.parse(jsonRead);
+        // const numberOfFilesSearched = Object.keys(searchObject.results).length;
+        // const fileName = Object.keys(searchObject.results)[fileIndex];
+        // const numberOfFileSearchResults = searchObject.results[fileName].length;
+        // const results = [];
+        // let currBlockCount = 0;
+        // for (let idx = 0; idx <= blockCount; idx++) {
+        //     results[fileName]
+
+        // }
+
     }
 
     sanitizeSearchTermEntry(term) {
