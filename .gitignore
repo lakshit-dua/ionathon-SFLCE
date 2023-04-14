@@ -2,3 +2,5 @@ __pycache__
 *.txt
 node_modules
 .eslintcache
+package-lock.json
+searchResults
