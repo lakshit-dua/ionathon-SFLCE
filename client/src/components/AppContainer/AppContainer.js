@@ -3,18 +3,20 @@ import FileDirectory from "../FileDirectory/FileDirectory";
 import FilePreview from "../FilePreview/FilePreview";
 import Navbar from "../Navbar/Navbar";
 import "./AppContainer.css"
+import Dashboard from "../Dashboard";
 
 
-const AppContainer = (props) => {
+const AppContainer = ({socket}) => {
   return (
     <div className="app-container">
-      {props.socket ? (
+      {socket ? (
           <Fragment>
-            <Navbar user={props.user} ></Navbar>
-            <div className="files-view-container">
+            {/* <Navbar user={props.user} ></Navbar> */}
+            <Dashboard socket={socket} />
+            {/* <div className="files-view-container">
               <FileDirectory socket={props.socket}></FileDirectory>
               <FilePreview socket={props.socket} />
-            </div>
+            </div> */}
           </Fragment>
       ) : (
         <div>Not Connected</div>
