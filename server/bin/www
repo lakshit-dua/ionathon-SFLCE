@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('server:server');
 var http = require('http');
-var filesHandler = require('../files');
+var socketHandler = require('../socketsHandler');
 var socketio = require('socket.io');
 
 /**
@@ -28,7 +28,7 @@ var io = socketio(server,{
     methods: ['GET', 'POST']
   }
 });
-filesHandler(io);
+socketHandler(io);
 
 /**
  * Listen on provided port, on all network interfaces.

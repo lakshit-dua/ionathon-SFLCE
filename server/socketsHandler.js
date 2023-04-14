@@ -1,6 +1,8 @@
 // const uuidv4 = require('uuid').v4;
 const fs = require('fs');
 const readline = require("readline");
+const DirectorySearchHandler = require("./directorySearchHandler");
+const FileSearchHandler = require("./fileSearchHandler");
 
 const messages = new Set();
 const users = new Map();
@@ -10,13 +12,16 @@ class Connection {
   constructor(io, socket) {
     this.socket = socket;
     this.io = io;
+    new FileSearchHandler(socket, this);
+    new DirectorySearchHandler(socket, this);
 
-    socket.on('getFile', (fileLocation, index, length) => this.sendFile(fileLocation, index, length));
-    socket.on('message', (value) => this.handleMessage(value));
-    socket.on('disconnect', () => this.disconnect());
-    socket.on('connect_error', (err) => {
-      console.log(`connect_error due to ${err.message}`);
-    });
+    // socket.on('getFile', (...params) => fileSearchhandler.handle(...params));
+    // socket.on('getFile', (...params) => fileSearchhandler.handle(...params));
+    // socket.on('message', (value) => this.handleMessage(value));
+    // socket.on('disconnect', () => this.disconnect());
+    // socket.on('connect_error', (err) => {
+    //   console.log(`connect_error due to ${err.message}`);
+    // });
   }
   
   sendMessage(message) {
@@ -51,7 +56,10 @@ class Connection {
     }
   }
 
-  handleMessage(value) {
+  handleMessage(message) {
+    switch (message) {
+
+    }
     const input = fs.createReadStream("index.html");
     const rl = readline.createInterface({ input })
     const cursor = 5;
@@ -74,10 +82,10 @@ class Connection {
   }
 }
 
-function filesHandler(io) {
+function socketHandler(io) {
   io.on('connection', (socket) => {
     new Connection(io, socket);   
   });
 };
 
-module.exports = filesHandler;
+module.exports = socketHandler;

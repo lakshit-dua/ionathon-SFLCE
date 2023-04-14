@@ -5,13 +5,15 @@ function Messages(props) {
   const [fileContent, setFileContent] = useState([]);
 
   const getFile = () => {
-    props.socket.emit("getFile", "public/index.html", 1,4);
+    props.socket.emit("getPublicDir", "");
+    props.socket.emit("getPublicDir", "client-folder");
   }
 
   useEffect(() => {
     const messageListener = (message) => {
         setFileContent(() => {
-            const lines = message?.content?.map((line, index) => { return {line, key: index } })
+            console.log(message);
+            const lines = message?.directory?.map((line, index) => { return {line, key: index } })
         return lines;
       });
     };  
