@@ -109,8 +109,9 @@ const Dashboard = (props) => {
 
   const handleSearchButtonClick = () => {
     setSearchResults(true);
+    setSearch(searchRef.current.children[0].value);
   }
-
+  const searchRef = React.useRef();
   console.log("Scroll position is", scrollX, scrollY);
   console.log("InitialIndex", addition, initialIndex, finalIndex);
   console.log(value);
@@ -136,10 +137,9 @@ const Dashboard = (props) => {
               padding: 1,
               borderRadius: 1,
             }}
+            ref={searchRef}
             placeholder="Search a keyword..."
             inputProps={{ "aria-label": "search a keyword..." }}
-            onChange={(event) => setSearch(event.target.value)}
-            value={search}
           />
           <IconButton type="button" aria-label="search" onClick={handleSearchButtonClick}>
             <SearchIcon />

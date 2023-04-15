@@ -11,7 +11,16 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SidebarTree from "./SiderbarTree";
 import Navbar from "./Navbar/Navbar";
-import { Button, Card, CardContent, CircularProgress, Grid, IconButton, InputBase, TextField } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Grid,
+  IconButton,
+  InputBase,
+  TextField,
+} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
 
@@ -67,41 +76,56 @@ const searchFileText = {
   },
 };
 
-
 const SearchView = (props) => {
   const [searchFileText, setSearchFileText] = useState(null);
-  
+
   useEffect(() => {
-    if(props?.search?.length > 0 && props?.fileId?.length > 0) {
+    if (props?.search?.length > 0 && props?.fileId?.length > 0) {
       props.socket.emit("search", "", props.fileId, props.search);
-        const messageListener = (message) => {
-          console.log(message.searchResult);
-          setSearchFileText(JSON.parse(message.searchResult));
-          props.socket.off('searchResp', messageListener)
-        };  
-        props.socket.on('searchResp', messageListener);
+      const messageListener = (message) => {
+        console.log(message.searchResult);
+        setSearchFileText(JSON.parse(message.searchResult));
+        props.socket.off("searchResp", messageListener);
+      };
+      props.socket.on("searchResp", messageListener);
     }
   }, [props.search, props.socket, props.fileId]);
 
-  return (<div>
-    {!searchFileText ? (<><CircularProgress />Processing Files...</>) :
-Object.keys(searchFileText.results).map((file, index) => {
-      return (
-        <Accordion key={index}>
-          <AccordionSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel1a-content"
-            id="panel1a-header"
+  return (
+    <div>
+      {!searchFileText ? (
+        <>
+          <Grid
+            container
+            spacing={0}
+            direction="column"
+            alignItems="center"
+            justifyContent="center"
+            style={{ minHeight: "100vh" }}
           >
-            <Typography>{file}</Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            {searchFileText.results[file].map((code, index) => {
-              return (
-                <Card sx={{ minWidth: 275, my: 5 }} key={index}>
-                  <CardContent>
-                    <Typography variant="body2">
-                      {/* {code[0].text.replace(
+            <Grid item xs={3} style={{display: "flex", alignItems: "center", justifyContent: "center", gap:"10px"}}>
+              <CircularProgress /> Processing Files...
+            </Grid>
+          </Grid>
+        </>
+      ) : (
+        Object.keys(searchFileText.results).map((file, index) => {
+          return (
+            <Accordion key={index}>
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel1a-content"
+                id="panel1a-header"
+              >
+                <Typography>{file}</Typography>
+              </AccordionSummary>
+              <AccordionDetails>
+                {searchFileText.results[file].map((code, index) => {
+                  return (
+                    <Card sx={{ minWidth: 275, my: 5 }} key={index}>
+                      <CardContent>
+                        <Typography variant="body2">
+                          {/* {code[0].text.replace(
                               new RegExp(searchFileText.term, "gi"),
                               (match) => {
                                 return (
@@ -113,16 +137,19 @@ Object.keys(searchFileText.results).map((file, index) => {
                                 );
                               }
                             )} */}
-                      {code[0].text}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </AccordionDetails>
-        </Accordion>
-      );
-    })}</div>)
+                          {code[0].text}
+                        </Typography>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </AccordionDetails>
+            </Accordion>
+          );
+        })
+      )}
+    </div>
+  );
 };
 
 export default SearchView;
