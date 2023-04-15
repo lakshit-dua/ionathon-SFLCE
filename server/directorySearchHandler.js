@@ -57,18 +57,24 @@ class DirectorySearchHandler {
     }
 
     handleArchiveListRequest(location) {
-        const path2 = path.join(__dirname, baseDir+"/"+location);
-        let entries = [];
-        console.log(path2);
-        Zip.list(path2).progress((entry) => {
-            entries = entries.concat(entry);
-        }).then(() =>{
-            console.log(entries);
-            this.connector.sendMessage("getArchiveListResp", {entries});
-        }).catch(err => {
-            console.log(err);
-            this.connector.sendMessage("getArchiveListResp",{err});
-        });
+        if (location != "") {
+            const path2 = path.join(__dirname, location);
+            let entries = [];
+            console.log(path2);
+            Zip.list(path2).progress((entry) => {
+                entries = entries.concat(entry);
+            }).then(() =>{
+                console.log(entries);
+                entries = entries.map((entry) =>  {
+                    const id = (location + entry.name).replace(/\//g,"\\");
+                    return {name: entry.name, id}
+                })
+                this.connector.sendMessage("getArchiveListResp", {entries, nodeId:location});
+            }).catch(err => {
+                console.log(err);
+                this.connector.sendMessage("getArchiveListResp",{err});
+            });
+        }
     }
 }
 

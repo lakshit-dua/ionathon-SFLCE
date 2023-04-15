@@ -82,24 +82,28 @@ const Dashboard = (props) => {
   const [search, setSearch] = useState("");
 
   const [fileContent, setFilecontent] = useState([]);
+  const [fileId, setFileId] = useState("");
+  const handlefileChange = (nodeId) => {
+    setFileId(nodeId)
+  }
 
   useEffect(() => {
     if (scrollY) setAddition((addition) => Math.floor(scrollY / 25));
   }, [scrollY]);
 
-  useEffect(() => {
-    setInitialIndex((initialIndex) => 0 + addition);
-    setFinalIndex((finalIndex) => 50 + addition);
-    props.socket.emit("getFile", "client-folder/check1/logs.txt", initialIndex, finalIndex);
-    const messageListener = (message) => {
-      setFilecontent(message.content);
-    };  
-    props.socket.on('getFileResp', messageListener);
+  // useEffect(() => {
+  //   setInitialIndex((initialIndex) => 0 + addition);
+  //   setFinalIndex((finalIndex) => 50 + addition);
+  //   props.socket.emit("getFile", "client-folder/check1/logs.txt", initialIndex, finalIndex);
+  //   const messageListener = (message) => {
+  //     setFilecontent(message.content);
+  //   };  
+  //   props.socket.on('getFileResp', messageListener);
 
-    return () => {
-      props.socket.off('getFileResp', messageListener);
-    };
-  }, [props.socket, addition]);
+  //   return () => {
+  //     props.socket.off('getFileResp', messageListener);
+  //   };
+  // }, [props.socket, addition]);
 
   console.log("Scroll position is", scrollX, scrollY);
   console.log("InitialIndex", addition, initialIndex, finalIndex);
@@ -153,7 +157,7 @@ const Dashboard = (props) => {
       >
         <Toolbar />
         <Box sx={{ overflow: "auto" }}>
-          <SidebarTree socket={props.socket} />
+          <SidebarTree socket={props.socket} fileSelected={handlefileChange} />
         </Box>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
@@ -162,7 +166,7 @@ const Dashboard = (props) => {
           {/* {fileContent.map((c) => (
             <div key={c.index}>{c.line}</div>
           ))} */}
-          <FileReader socket={props.socket}/>
+          <FileReader socket={props.socket} fileId={fileId}/>
           {/* <Accordion>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}

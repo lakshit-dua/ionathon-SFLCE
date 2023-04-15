@@ -12,7 +12,7 @@ const callApi = (offset, limit, props) => {
     // setTimeout(() => {
     //   resolve(items)
     // }, 500)
-      props.socket.emit("getFile", "client-folder/check1/logs.txt", offset < 0 ? 0 : offset , (offset < 0 ? 0 : offset) + limit);
+      props.socket.emit("getFile", props.fileId, offset < 0 ? 0 : offset , (offset < 0 ? 0 : offset) + limit);
       const messageListener = (message) => {
         items.push(...message.content);
         resolve(items)
@@ -33,11 +33,13 @@ function FileReader(props) {
 
   useEffect(() => {
     setIsLoading(true)
-    callApi(0, buffer, props).then((res) => {
-      setItems(res)
-      setIsLoading(false)
-    })
-  }, [])
+    if (props.fileId) {
+      callApi(0, buffer, props).then((res) => {
+        setItems(res)
+        setIsLoading(false)
+      })
+    }
+  }, [props.fileId])
 
   const prevCallback = (newOffset) => {
     setIsLoading(true)

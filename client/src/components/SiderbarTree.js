@@ -25,15 +25,28 @@ const data = {
   ],
 };
 
+// const getNodeRef = (dataRef, nodeId) => {
+//   if (dataRef.id === nodeId) {
+//     return dataRef
+//   } else if(dataRef.children) {
+//     dataRef.children.forEach(child => {
+//       return (ref || getNodeRef(child, nodeId));
+//     });
+//   }
+// }
+
+const findItemNested = (arr, itemId, nestingKey) => (
+  arr.reduce((a, item) => {
+    if (a) return a;
+    if (item.id === itemId) return item;
+    if (item[nestingKey]) return findItemNested(item[nestingKey], itemId, nestingKey)
+  }, null)
+);
+
 export default function SidebarTree(props) {
   const initial = {id: 'root',
   name: 'Parent',children: []};
   const [data, setData] = React.useState(initial);
-
-  const getFile = () => {
-    props.socket.emit("getPublicDir", "");
-    props.socket.emit("getPublicDir", "client-folder");
-  }
 
   React.useEffect(() => {
     props.socket.emit("getPublicDir", "");
@@ -49,8 +62,40 @@ export default function SidebarTree(props) {
       props.socket.off('getPublicDirResp', messageListener);
     };
   }, [props.socket]);
+
+  const [selectedFile, setSelectedFile] = React.useState("");
+
+  React.useEffect(() => {
+    if (props.socket) {      
+      props.socket.emit("getArchiveList", selectedFile);
+      const messageListener = (message) => {
+          setData((prev) => {
+            const ref = findItemNested(prev.children, message.nodeId, "children");
+            const childEntries = message.entries.map((entry) => { return {name: entry.name, id: entry.id}});
+            ref.children = childEntries;
+            console.log("new", ref, message.entries, childEntries)
+            return JSON.parse(JSON.stringify(prev));
+        });
+      };  
+      props.socket.on('getArchiveListResp', messageListener);
+  
+      return () => {
+        props.socket.off('getArchiveListResp', messageListener);
+      };
+    }
+  }, [selectedFile]);
+
+  const handleSelectionChange = (event, nodeId) => {
+    if(nodeId.includes("tar") || nodeId.includes("tz") || nodeId.includes("7z") || nodeId.includes("zip")) {
+      setSelectedFile(nodeId || "");
+    } else if(nodeId.includes("txt")) {
+      props.fileSelected(nodeId);
+    }
+  }
+
+
   const renderTree = (nodes) => (
-    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name}>
+    <TreeItem key={nodes.id} nodeId={nodes.id} label={nodes.name} >
       {Array.isArray(nodes.children)
         ? nodes.children.map((node) => renderTree(node))
         : null}
@@ -63,7 +108,8 @@ export default function SidebarTree(props) {
       defaultCollapseIcon={<ExpandMoreIcon />}
       defaultExpanded={['root']}
       defaultExpandIcon={<ChevronRightIcon />}
-      sx={{ height: 110, flexGrow: 1, maxWidth: 400, overflowY: 'auto', my: 5 }}
+      onNodeSelect={handleSelectionChange}
+      sx={{ flexGrow: 1, maxWidth: 400, overflowY: 'auto', my: 5 }}
     >
       {renderTree(data)}
     </TreeView>
