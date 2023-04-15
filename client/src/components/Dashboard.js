@@ -92,7 +92,7 @@ const Dashboard = (props) => {
     setFinalIndex((finalIndex) => 50 + addition);
     props.socket.emit("getFile", "client-folder/check1/logs.txt", initialIndex, finalIndex);
     const messageListener = (message) => {
-      setFilecontent(message);
+      setFilecontent(message.content);
     };  
     props.socket.on('getFileResp', messageListener);
 
@@ -159,10 +159,10 @@ const Dashboard = (props) => {
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         <div>
-          {/* {fileContent.map((c, idx) => (
-            <div>{c}</div>
+          {/* {fileContent.map((c) => (
+            <div key={c.index}>{c.line}</div>
           ))} */}
-          <FileReader />
+          <FileReader socket={props.socket}/>
           {/* <Accordion>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}

@@ -5,24 +5,25 @@ import UiVirtualScroll from './UiVirtualScroll'
 const callApi = (offset, limit, props) => {
   return new Promise((resolve) => {
     const items = [];
-    for (let index = offset; index < offset + limit; index++) {
-      items.push('label ' + index)
-    }
+    // for (let index = offset; index < offset + limit; index++) {
+    //   items.push('label ' + index)
+    // }
 
-    setTimeout(() => {
-      resolve(items)
-    }, 500)
-
-    props.socket.emit("getFile", "client-folder/check1/logs.txt", offset, offset + limit);
-    const messageListener = (message) => {
-      items.push(...message.content);
-    };  
-    props.socket.on('getFileResp', messageListener);
-  })
+    // setTimeout(() => {
+    //   resolve(items)
+    // }, 500)
+      props.socket.emit("getFile", "client-folder/check1/logs.txt", offset < 0 ? 0 : offset , (offset < 0 ? 0 : offset) + limit);
+      const messageListener = (message) => {
+        items.push(...message.content);
+        resolve(items)
+        props.socket.off('getFileResp', messageListener)
+      };  
+      props.socket.on('getFileResp', messageListener);
+  });
 }
 
-function FileReader() {
-  const limit = 100
+function FileReader(props) {
+  const limit = 20
   // the number of items that we want to keep in memory - 300
   const buffer = limit * 3
   // the number of items that we want to cache when new chunk of data is loaded
@@ -32,7 +33,7 @@ function FileReader() {
 
   useEffect(() => {
     setIsLoading(true)
-    callApi(0, buffer).then((res) => {
+    callApi(0, buffer, props).then((res) => {
       setItems(res)
       setIsLoading(false)
     })
@@ -41,7 +42,7 @@ function FileReader() {
   const prevCallback = (newOffset) => {
     setIsLoading(true)
 
-    return callApi(newOffset, limit).then((res) => {
+    return callApi(newOffset, limit, props).then((res) => {
       const newItems = [...res, ...items.slice(0, cache)];
       setItems(newItems)
       setIsLoading(false)
@@ -52,7 +53,7 @@ function FileReader() {
   const nextCallback = (newOffset) => {
     setIsLoading(true)
 
-    return callApi(newOffset, limit).then((res) => {
+    return callApi(newOffset, limit, props).then((res) => {
       const newItems = [...items.slice(-cache), ...res];
       setItems(newItems)
       setIsLoading(false)
