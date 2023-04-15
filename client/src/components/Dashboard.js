@@ -18,6 +18,7 @@ import SidebarTree from "./SiderbarTree";
 import Navbar from "./Navbar/Navbar";
 import { Button, Grid, IconButton, InputBase, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import FileReader from "./FileReader";
 
 const drawerWidth = 400;
 
@@ -72,8 +73,6 @@ const content = [
   "dlkfjgldkjfg",
 ];
 
-
-
 const Dashboard = (props) => {
   const { scrollX, scrollY } = useWindowScrollPositions();
   const [initialIndex, setInitialIndex] = useState(0);
@@ -93,7 +92,7 @@ const Dashboard = (props) => {
     setFinalIndex((finalIndex) => 50 + addition);
     props.socket.emit("getFile", "client-folder/check1/logs.txt", initialIndex, finalIndex);
     const messageListener = (message) => {
-      setFilecontent(message.content)
+      setFilecontent(message);
     };  
     props.socket.on('getFileResp', messageListener);
 
@@ -160,9 +159,10 @@ const Dashboard = (props) => {
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         <div>
-          {fileContent.map((c) => (
+          {/* {fileContent.map((c, idx) => (
             <div>{c}</div>
-          ))}
+          ))} */}
+          <FileReader />
           {/* <Accordion>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
