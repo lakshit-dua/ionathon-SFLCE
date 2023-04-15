@@ -5,7 +5,7 @@ import LoginDialog from './components/LoginDialog/LoginDialog';
 
 function App() {
   const [socket, setSocket] = useState(null);
-  const [user, setUser] = useState(true);
+  const [user, setUser] = useState(null);
 
   const handleUserLogin = (userData) => {
     setUser(userData);
