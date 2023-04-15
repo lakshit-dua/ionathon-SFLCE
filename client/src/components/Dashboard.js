@@ -124,7 +124,7 @@ const Dashboard = (props) => {
       >
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography variant="h6" noWrap component="div">
-            Debug Console
+            Log Inspector
           </Typography>
           {/* <TextField id="outlined-basic" label="Outlined secondary" color="secondary" variant="outlined" sx={{width: 600}} focused /> */}
           <InputBase
