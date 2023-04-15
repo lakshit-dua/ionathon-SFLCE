@@ -11,7 +11,7 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SidebarTree from "./SiderbarTree";
 import Navbar from "./Navbar/Navbar";
-import { Button, Card, CardContent, Grid, IconButton, InputBase, TextField } from "@mui/material";
+import { Button, Card, CardContent, CircularProgress, Grid, IconButton, InputBase, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { useEffect, useState } from "react";
 
@@ -84,7 +84,7 @@ const SearchView = (props) => {
   }, [props.search, props.socket, props.fileId]);
 
   return (<div>
-    {searchFileText &&
+    {!searchFileText ? (<><CircularProgress />Processing Files...</>) :
 Object.keys(searchFileText.results).map((file, index) => {
       return (
         <Accordion key={index}>
