@@ -103,17 +103,50 @@ class FileSearchHandler {
             encoding: "UTF8"
         });
 
-        // const searchObject = JSON.parse(jsonRead);
-        // const numberOfFilesSearched = Object.keys(searchObject.results).length;
-        // const fileName = Object.keys(searchObject.results)[fileIndex];
-        // const numberOfFileSearchResults = searchObject.results[fileName].length;
-        // const results = [];
-        // let currBlockCount = 0;
-        // for (let idx = 0; idx <= blockCount; idx++) {
-        //     results[fileName]
+        const blocksToReturn = {};
 
-        // }
+        const searchObject = JSON.parse(jsonRead);
+        const numberOfFilesSearched = Object.keys(searchObject.results).length;
+        const fileName = Object.keys(searchObject.results)[fileIndex];
+        const numberOfFileSearchResults = searchObject.results[fileName].length;
+        const results = [];
+        let currBlockCount = 0;
+        if (blockIndex <= results[fileName].length) {
+            // First we append the remaining blocks from that file
+            for (let idx = blockIndex; idx <= results[fileName].length; idx++) {
+                if (currBlockCount <= blockCount) {
+                    if (!Array.isArray(blocksToReturn[fileName])) {
+                        blocksToReturn[fileName] = [];
+                    }
+                    blocksToReturn[fileName].append(results[fileName][idx]);
+                    currBlockCount++;
+                } else {
+                    break;
+                }
+            }
+            if (fileIndex + 1 < Object.keys(searchObject.results).length) {
+                for (let index = fileIndex + 1; index < Object.keys(searchObject.results).length; index++) {
+                    if (currBlockCount <= blockCount) {
+                        const fileKey = Object.keys(searchObject.results)[index];
+                        if (currBlockCount + searchObject.results[fileKey].length >= blockCount) {
+                            for (let fileIndex = 0; fileIndex <= (blockCount - currBlockCount); fileIndex++) {
+                                blocksToReturn[fileName].append(results[fileName][fileIndex]);
+                            }
+                        } else {
+                            if (!Array.isArray(blocksToReturn[fileName])) {
+                                blocksToReturn[fileName] = [];
+                            }
+                            blocksToReturn[fileName].append(...results[fileName]);
+                            currBlockCount++;
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
 
+        this.connector.sendMessage("searchResp", {jsonRead: blocksToReturn});
     }
 
     sanitizeSearchTermEntry(term) {
