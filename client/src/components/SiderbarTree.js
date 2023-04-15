@@ -90,6 +90,7 @@ export default function SidebarTree(props) {
       setSelectedFile(nodeId || "");
     } else if(nodeId.includes(".txt") || nodeId.includes(".log")) {
       props.fileSelected(nodeId);
+      props.setSearchResults(false);
     }
   }
 

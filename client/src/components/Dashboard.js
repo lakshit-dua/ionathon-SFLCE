@@ -163,7 +163,7 @@ const Dashboard = (props) => {
       >
         <Toolbar />
         <Box sx={{ overflow: "auto" }}>
-          <SidebarTree socket={props.socket} fileSelected={handlefileChange} />
+          <SidebarTree socket={props.socket} fileSelected={handlefileChange} setSearchResults={setSearchResults} />
         </Box>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
@@ -172,7 +172,7 @@ const Dashboard = (props) => {
           {/* {fileContent.map((c) => (
             <div key={c.index}>{c.line}</div>
           ))} */}
-          { searchResults ? <SearchView socket={props.socket} fileId={fileId} search={search}/> : <FileReader socket={props.socket} fileId={fileId}/> }
+        { searchResults ? <SearchView socket={props.socket} fileId={fileId} search={search}/> : <FileReader socket={props.socket} fileId={fileId} /> }
           {/* <Accordion>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}

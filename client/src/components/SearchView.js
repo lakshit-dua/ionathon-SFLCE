@@ -81,6 +81,7 @@ const SearchView = (props) => {
 
   useEffect(() => {
     if (props?.search?.length > 0 && props?.fileId?.length > 0) {
+      setSearchFileText(null);
       props.socket.emit("search", "", props.fileId, props.search);
       const messageListener = (message) => {
         console.log(message.searchResult);
