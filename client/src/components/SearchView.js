@@ -1,3 +1,20 @@
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
+import AppBar from "@mui/material/AppBar";
+import CssBaseline from "@mui/material/CssBaseline";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import SidebarTree from "./SiderbarTree";
+import Navbar from "./Navbar/Navbar";
+import { Button, Card, CardContent, Grid, IconButton, InputBase, TextField } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { useEffect, useState } from "react";
+
 const searchFileText = {
   term: "amet",
   results: {
@@ -50,9 +67,24 @@ const searchFileText = {
   },
 };
 
-const SearchView = () => {
-  {
-    Object.keys(searchFileText.results).map((file, index) => {
+
+const SearchView = (props) => {
+  const [searchFileText, setSearchFileText] = useState(null);
+  
+  useEffect(() => {
+    if(props?.search?.length > 0 && props?.fileId?.length > 0) {
+      props.socket.emit("search", "", props.fileId, props.search);
+        const messageListener = (message) => {
+          console.log(message.searchResult);
+          setSearchFileText(message.searchResult);
+          props.socket.off('searchResp', messageListener)
+        };  
+        props.socket.on('searchResp', messageListener);
+    }
+  }, [props.search, props.socket, props.fileId]);
+
+  {searchFileText ? 
+    (Object.keys(searchFileText.results).map((file, index) => {
       return (
         <Accordion key={index}>
           <AccordionSummary
@@ -89,6 +121,7 @@ const SearchView = () => {
           </AccordionDetails>
         </Accordion>
       );
-    });
-  }
+    })): <div></div>}
 };
+
+export default SearchView;

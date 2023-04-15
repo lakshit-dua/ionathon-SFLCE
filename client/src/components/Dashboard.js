@@ -19,6 +19,7 @@ import Navbar from "./Navbar/Navbar";
 import { Button, Grid, IconButton, InputBase, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import FileReader from "./FileReader";
+import SearchView from "./SearchView";
 
 const drawerWidth = 400;
 
@@ -80,6 +81,7 @@ const Dashboard = (props) => {
   const [addition, setAddition] = useState(0);
   const [value] = useDebounce(addition, 1000);
   const [search, setSearch] = useState("");
+  const [searchResults, setSearchResults] = useState(false);
 
   const [fileContent, setFilecontent] = useState([]);
   const [fileId, setFileId] = useState("");
@@ -104,6 +106,10 @@ const Dashboard = (props) => {
   //     props.socket.off('getFileResp', messageListener);
   //   };
   // }, [props.socket, addition]);
+
+  const handleSearchButtonClick = () => {
+    setSearchResults(true);
+  }
 
   console.log("Scroll position is", scrollX, scrollY);
   console.log("InitialIndex", addition, initialIndex, finalIndex);
@@ -135,7 +141,7 @@ const Dashboard = (props) => {
             onChange={(event) => setSearch(event.target.value)}
             value={search}
           />
-          <IconButton type="button" aria-label="search" >
+          <IconButton type="button" aria-label="search" onClick={handleSearchButtonClick}>
             <SearchIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
@@ -166,7 +172,7 @@ const Dashboard = (props) => {
           {/* {fileContent.map((c) => (
             <div key={c.index}>{c.line}</div>
           ))} */}
-          <FileReader socket={props.socket} fileId={fileId}/>
+          { searchResults ? <SearchView socket={props.socket} fileId={fileId} search={search}/> : <FileReader socket={props.socket} fileId={fileId}/> }
           {/* <Accordion>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}

@@ -95,7 +95,7 @@ class FileSearchHandler {
             const jsonRead = fs.readFileSync(searchResultsDir + "/" + searchTermCleanEntryName + ".json", {
                 encoding: "UTF8"
             });
-            self.connector.sendMessage("searchResp", {jsonRead});
+            self.connector.sendMessage("searchResp", {searchResult: jsonRead});
         });
     }
 
