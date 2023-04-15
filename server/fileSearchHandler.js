@@ -51,14 +51,16 @@ class FileSearchHandler {
     handleFileSearch(path, fileName, searchTerm) {
         const self = this;
         let searchTermCleanEntryName = this.sanitizeSearchTermEntry(searchTerm);
-        fs.unlinkSync(`${searchResultsDir}/${searchTermCleanEntryName}.json`);
+        if(fs.existsSync(`${searchResultsDir}/${searchTermCleanEntryName}.json`)) {
+            fs.unlinkSync(`${searchResultsDir}/${searchTermCleanEntryName}.json`);
+        }
         const jsonWriteStream = fs.createWriteStream(`${searchResultsDir}/${searchTermCleanEntryName}.json`, { 
           flags: "a" 
         });
         const baseJsonContent = `{ "term": "${searchTerm}", "results": {`;
         this.closingBraces = "}}";
         jsonWriteStream.write(baseJsonContent);
-        const fileSearchStream = fs.createReadStream(baseDir+path+"/"+fileName);
+        const fileSearchStream = fs.createReadStream(fileName);
         jsonWriteStream.write(`"${this.sanitizeSearchTermEntry(fileName)}": [`);
         this.closingBraces = "]" + this.closingBraces;
         fileSearchStream.setEncoding("UTF8");

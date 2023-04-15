@@ -76,15 +76,16 @@ const SearchView = (props) => {
       props.socket.emit("search", "", props.fileId, props.search);
         const messageListener = (message) => {
           console.log(message.searchResult);
-          setSearchFileText(message.searchResult);
+          setSearchFileText(JSON.parse(message.searchResult));
           props.socket.off('searchResp', messageListener)
         };  
         props.socket.on('searchResp', messageListener);
     }
   }, [props.search, props.socket, props.fileId]);
 
-  {searchFileText ? 
-    (Object.keys(searchFileText.results).map((file, index) => {
+  return (<div>
+    {searchFileText &&
+Object.keys(searchFileText.results).map((file, index) => {
       return (
         <Accordion key={index}>
           <AccordionSummary
@@ -121,7 +122,7 @@ const SearchView = (props) => {
           </AccordionDetails>
         </Accordion>
       );
-    })): <div></div>}
+    })}</div>)
 };
 
 export default SearchView;
