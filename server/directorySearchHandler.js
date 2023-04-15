@@ -19,15 +19,37 @@ class DirectorySearchHandler {
         const self = this;
         try {
             const directory = [];
-            fs.readdir((baseDir+"/"+location), (err, files) => {
-                if(files) {
-                    files.forEach(file => {
-                        console.log(file);
-                        directory.push(file)
+            // fs.readdir((baseDir+"/"+location), (err, files) => {
+            //     if(files) {
+            //         files.forEach(file => {
+            //             console.log(file);
+            //             directory.push(file)
+            //         });
+            //     }
+            //     self.connector.sendMessage("getPublicDirResp",{directory});
+            //   });
+                let files  = {
+                    id: 'root',
+                    name: 'Parent',
+                    children: []
+                };
+
+                function ThroughDirectory(Directory, data=files) {
+                    fs.readdirSync(Directory).forEach(File => {
+                        const Absolute = path.join(Directory, File);
+                        if (fs.statSync(Absolute).isDirectory()) {
+                            const myResult = { name: File, id: Absolute, children:[] };
+                            data.children.push(myResult);
+                            return ThroughDirectory(Absolute, myResult)
+                        }
+                        else {
+                            return data.children.push({name: File, id: Absolute});
+                        }
                     });
                 }
-                self.connector.sendMessage("getPublicDirResp",{directory});
-              });
+                ThroughDirectory(baseDir+"/"+location, files);
+                console.log(files);
+                self.connector.sendMessage("getPublicDirResp",{directory: files});
         } catch(err) {
             console.log(err)
             self.connector.sendMessage("getPublicDirResp",{err});

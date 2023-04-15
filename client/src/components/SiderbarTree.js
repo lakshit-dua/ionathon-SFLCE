@@ -26,7 +26,9 @@ const data = {
 };
 
 export default function SidebarTree(props) {
-  const [data, setData] = React.useState([]);
+  const initial = {id: 'root',
+  name: 'Parent',children: []};
+  const [data, setData] = React.useState(initial);
 
   const getFile = () => {
     props.socket.emit("getPublicDir", "");
@@ -36,17 +38,9 @@ export default function SidebarTree(props) {
   React.useEffect(() => {
     props.socket.emit("getPublicDir", "");
     const messageListener = (message) => {
-
-       const data = {
-        id: 'root',
-        name: 'Parent',
-        children: []};
-        message.directory.forEach(element => {
-          data.children.push({name: element, id: element, children:[]});
-        });
         setData(() => {
-          console.log(data);
-          return data;
+          console.log("new", message.directory)
+          return message.directory;
       });
     };  
     props.socket.on('getPublicDirResp', messageListener);

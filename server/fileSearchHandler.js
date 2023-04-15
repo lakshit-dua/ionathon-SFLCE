@@ -28,7 +28,6 @@ class FileSearchHandler {
             rl.on('line', function(line) {
               if (cursor > startIndex && cursor <= startIndex+count) {
                   content.push(line);
-                  console.log(line);
               }
               cursor++;
               if (cursor === startIndex+count) {
