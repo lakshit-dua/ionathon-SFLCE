@@ -88,7 +88,7 @@ export default function SidebarTree(props) {
   const handleSelectionChange = (event, nodeId) => {
     if(nodeId.includes("tar") || nodeId.includes("tz") || nodeId.includes("7z") || nodeId.includes("zip")) {
       setSelectedFile(nodeId || "");
-    } else if(nodeId.includes("txt")) {
+    } else if(nodeId.includes(".txt") || nodeId.includes(".log")) {
       props.fileSelected(nodeId);
     }
   }
