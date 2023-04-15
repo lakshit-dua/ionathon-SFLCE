@@ -80,17 +80,16 @@ const SearchView = (props) => {
   const [searchFileText, setSearchFileText] = useState(null);
 
   useEffect(() => {
-    if (props?.search?.length > 0 && props?.fileId?.length > 0) {
-      setSearchFileText(null);
-      props.socket.emit("search", "", props.fileId, props.search);
-      const messageListener = (message) => {
-        console.log(message.searchResult);
-        setSearchFileText(JSON.parse(message.searchResult));
-        props.socket.off("searchResp", messageListener);
-      };
-      props.socket.on("searchResp", messageListener);
+    if(props?.search?.length > 0) {
+      props.socket.emit("search", props.search);
+        const messageListener = (message) => {
+          console.log(message.searchResult);
+          setSearchFileText(JSON.parse(message.searchResult));
+          props.socket.off('searchResp', messageListener)
+        };  
+        props.socket.on('searchResp', messageListener);
     }
-  }, [props.search, props.socket, props.fileId]);
+  }, [props.search, props.socket]);
 
   return (
     <div>
